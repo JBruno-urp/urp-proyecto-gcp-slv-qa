@@ -1,0 +1,20 @@
+{
+    "dag_id": "urp_dml_load_{env}",
+    "create_disposition": "CREATE_NEVER",
+    "write_dispositions": [
+      {
+        "write_disposition": "WRITE_TRUNCATE",
+        "scripts": [
+          "asistencia",
+          "curso",
+          "estudiante",
+          "programa"
+        ]
+      }
+    ],
+    "retries": "1",
+    "retry_delay": "2",
+    "mail_responsables": [
+      "joseph.iparraguirre@urp.edu.pe"
+    ]
+  }
