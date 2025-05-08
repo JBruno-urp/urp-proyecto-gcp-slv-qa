@@ -10,7 +10,7 @@
   ---------------------------------
 *********************************************************************************************************************
 */
-TRUNCATE TABLE `slv-tpg-urp-2025.data_entries.asistencia` WHERE TRUE;
+TRUNCATE TABLE `slv-tpg-urp-2025.data_entries.asistencia`;
 
 INSERT INTO `slv-tpg-urp-2025.data_entries.asistencia`
 WITH base_data AS (

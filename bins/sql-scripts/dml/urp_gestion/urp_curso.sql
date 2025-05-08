@@ -11,7 +11,7 @@
 *********************************************************************************************************************
 */
 
-TRUNCATE TABLE `slv-tpg-urp-2025.data_entries.curso` WHERE TRUE;
+TRUNCATE TABLE `slv-tpg-urp-2025.data_entries.curso` ;
 
 INSERT INTO `slv-tpg-urp-2025.data_entries.curso`
 WITH base_data AS (

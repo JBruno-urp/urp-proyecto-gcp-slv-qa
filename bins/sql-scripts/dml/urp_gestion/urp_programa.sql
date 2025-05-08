@@ -12,7 +12,7 @@
 */
 
 
-TRUNCATE TABLE `slv-tpg-urp-2025.data_entries.programa` WHERE TRUE;
+TRUNCATE TABLE `slv-tpg-urp-2025.data_entries.programa`;
 
 INSERT INTO `slv-tpg-urp-2025.data_entries.programa`
 WITH base_data AS (
