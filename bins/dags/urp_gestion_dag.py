@@ -7,20 +7,16 @@ import os
 import json
 from datetime import timedelta
 
-# Ruta al archivo de parámetros
 PARAMS_FILE = os.path.join(os.path.dirname(__file__), "sql-scripts/dml/urp_gestion/parameters.json")
 
-# Cargar parámetros del JSON
 def cargar_parametros():
     with open(PARAMS_FILE) as f:
         return json.load(f)
 
-# Leer contenido SQL como string
 def leer_sql_como_string(path):
     with open(path, "r") as f:
         return f.read()
 
-# Callback en caso de error
 def notificar_fallo(context):
     asunto = f"Fallo en DAG: {context['dag'].dag_id}"
     mensaje = f"""
@@ -31,10 +27,8 @@ def notificar_fallo(context):
     """
     send_email(to=PARAMS['mail_responsables'], subject=asunto, html_content=mensaje)
 
-# Cargar parámetros del archivo JSON
 PARAMS = cargar_parametros()
 
-# Definir el DAG
 with DAG(
     dag_id=PARAMS["dag_id"],
     default_args={
@@ -48,22 +42,25 @@ with DAG(
     tags=["urp", "gestion", "silver"]
 ) as dag:
 
-    # Crear tareas dinámicamente según los scripts definidos
     for group in PARAMS["write_dispositions"]:
         for script_name in group["scripts"]:
             sql_path = os.path.join(os.path.dirname(__file__), f"sql-scripts/dml/urp_gestion/{script_name}.sql")
             sql_query = leer_sql_como_string(sql_path)
 
+            # Configuración básica
+            config_query = {
+                "query": sql_query,
+                "useLegacySql": False
+            }
+
+            # Detecta si es un script (varias instrucciones SQL)
+            if sql_query.strip().count(";") <= 1:
+                config_query["createDisposition"] = PARAMS["create_disposition"]
+                config_query["writeDisposition"] = group["write_disposition"]
+
             task = BigQueryInsertJobOperator(
                 task_id=f"load_{script_name}",
-                configuration={
-                    "query": {
-                        "query": sql_query,
-                        "useLegacySql": False,
-                        "createDisposition": PARAMS["create_disposition"],
-                        "writeDisposition": group["write_disposition"]
-                    }
-                },
+                configuration={"query": config_query},
                 location=PARAMS["location"],
                 project_id=PARAMS["project_id"],
                 gcp_conn_id="google_cloud_default"
