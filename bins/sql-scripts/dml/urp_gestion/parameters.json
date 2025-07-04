@@ -1,20 +1,29 @@
 {
-    "dag_id": "urp_dml_load_{env}",
-    "create_disposition": "CREATE_NEVER",
-    "write_dispositions": [
-      {
-        "write_disposition": "WRITE_TRUNCATE",
-        "scripts": [
-          "asistencia",
-          "curso",
-          "estudiante",
-          "programa"
-        ]
-      }
-    ],
-    "retries": "1",
-    "retry_delay": "2",
-    "mail_responsables": [
-      "joseph.iparraguirre@urp.edu.pe"
-    ]
-  }
+  "dag_id": "urp_gestion_dag",
+  "project_id": "slv-tpg-urp-2025-464218",
+  "location": "us-central1",
+  "create_disposition": "CREATE_IF_NEEDED",
+  "write_dispositions": [
+    {
+      "write_disposition": "WRITE_TRUNCATE",
+      "scripts": [
+        "urp_aula",
+        "urp_carrera",
+        "urp_curso",
+        "urp_estudiante",
+        "urp_horario",
+        "urp_profesor",
+        "urp_estado_carrera",
+        "urp_inscripcion_carrera",
+        "urp_ocurrencia_curso",
+        "urp_nivel_carrera"
+      ]
+    }
+  ],
+  "mail_responsables": ["joseph.iparraguirre@urp.edu.pe"]
+}
+// This file contains the parameters for the URP Gestion DAG in Airflow.
+// It includes the DAG ID, project ID, location, create disposition, write dispositions for various SQL scripts, and the email of the responsible person.
+// The DAG is designed to manage the URP Gestion data processing tasks, ensuring that the necessary tables are created and truncated as needed.
+// The write dispositions specify that the tables will be truncated before new data is inserted, ensuring that  the data is always fresh and up-to-date.
+// The email of the responsible person is included for notifications or alerts related to the DAG execution.          

@@ -1,57 +1,70 @@
-# dags/urp_gestion_dag.py
 from airflow import DAG
+from airflow.operators.python import PythonOperator
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.utils.dates import days_ago
-from pathlib import Path
+from airflow.utils.email import send_email
 import os
+import json
+from datetime import timedelta
 
-# Configuraciones
-PROJECT_ID = "slv-tpg-urp-2025"
-LOCATION = "US"
-BQ_CONN_ID = "google_cloud_default"
-DAG_ID = "urp_gestion_dag"
-SQL_FOLDER = "/home/airflow/gcs/data/sql-scripts/dml/urp_gestion"
+# Ruta al archivo de parámetros
+PARAMS_FILE = os.path.join(os.path.dirname(__file__), "sql-scripts/dml/urp_gestion/parameters.json")
 
-# Lista manual de scripts SQL que quieres ejecutar
-SQL_SCRIPTS = [
-    "urp_asistencia.sql",
-    "urp_curso.sql",
-    "urp_estudiante.sql",
-    "urp_programa"
-    
-]
+# Cargar parámetros del JSON
+def cargar_parametros():
+    with open(PARAMS_FILE) as f:
+        return json.load(f)
 
-default_args = {
-    "start_date": days_ago(1),
-    "retries": 1
-}
+# Leer contenido SQL como string
+def leer_sql_como_string(path):
+    with open(path, "r") as f:
+        return f.read()
 
+# Callback en caso de error
+def notificar_fallo(context):
+    asunto = f"Fallo en DAG: {context['dag'].dag_id}"
+    mensaje = f"""
+    DAG: {context['dag'].dag_id}<br>
+    Tarea: {context['task_instance'].task_id}<br>
+    Ejecución: {context['execution_date']}<br>
+    Error: {context['exception']}<br>
+    """
+    send_email(to=PARAMS['mail_responsables'], subject=asunto, html_content=mensaje)
+
+# Cargar parámetros del archivo JSON
+PARAMS = cargar_parametros()
+
+# Definir el DAG
 with DAG(
-    dag_id=DAG_ID,
-    default_args=default_args,
+    dag_id=PARAMS["dag_id"],
+    default_args={
+        "retries": PARAMS.get("retries", 1),
+        "retry_delay": timedelta(minutes=PARAMS.get("retry_delay", 1)),
+        "on_failure_callback": notificar_fallo
+    },
     schedule_interval=None,
+    start_date=days_ago(1),
     catchup=False,
-    tags=["urp", "dml", "gestion"]
+    tags=["urp", "gestion", "silver"]
 ) as dag:
 
-    for script in SQL_SCRIPTS:
-        script_path = os.path.join(SQL_FOLDER, script)
-        task_id = f"run_{Path(script).stem}"
+    # Crear tareas dinámicamente según los scripts definidos
+    for group in PARAMS["write_dispositions"]:
+        for script_name in group["scripts"]:
+            sql_path = os.path.join(os.path.dirname(__file__), f"sql-scripts/dml/urp_gestion/{script_name}.sql")
+            sql_query = leer_sql_como_string(sql_path)
 
-        with open(script_path, "r") as f:
-            query = f.read()
-
-        BigQueryInsertJobOperator(
-            task_id=task_id,
-            job_id=f"{task_id}_{{{{ ts_nodash }}}}",
-            configuration={
-                "query": {
-                    "query": query,
-                    "useLegacySql": False,
-                    "writeDisposition": "WRITE_TRUNCATE"
-                }
-            },
-            location=LOCATION,
-            gcp_conn_id=BQ_CONN_ID,
-            project_id=PROJECT_ID,
-        )
+            task = BigQueryInsertJobOperator(
+                task_id=f"load_{script_name}",
+                configuration={
+                    "query": {
+                        "query": sql_query,
+                        "useLegacySql": False,
+                        "createDisposition": PARAMS["create_disposition"],
+                        "writeDisposition": group["write_disposition"]
+                    }
+                },
+                location=PARAMS["location"],
+                project_id=PARAMS["project_id"],
+                gcp_conn_id="google_cloud_default"
+            )
