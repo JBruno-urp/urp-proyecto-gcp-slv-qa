@@ -1,0 +1,22 @@
+{
+    "dag_id": "urp_calidad_dag",
+    "project_id": "slv-tpg-urp-2025-464218",
+    "location": "US",
+    "create_disposition": "CREATE_IF_NEEDED",
+    "write_dispositions": [
+        {
+            "write_disposition": "WRITE_TRUNCATE",
+            "scripts": [
+                "calidad_banco_regla",
+                "calidad_criticidad_agrupador_campo",
+                "calidad_criticidad_campo",
+                "calidad_criticidad_dominio",
+                "calidad_criticidad_subdominio",
+                "calidad_maestro_control_bau"
+            ]
+        }
+    ],
+    "mail_responsables": [
+        "joseph.iparraguirre@urp.edu.pe"
+    ]
+}
