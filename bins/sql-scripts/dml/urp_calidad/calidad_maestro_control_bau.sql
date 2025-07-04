@@ -71,4 +71,4 @@ SELECT
   CASE WHEN TRIM(tipo_control) IN ('', 'nan') THEN NULL ELSE TRIM(tipo_control) END AS tip_control,
   NULLIF(TRIM(momento_implementacion), 'nan') AS des_momento_implementacion,
   CURRENT_DATETIME('America/Lima') AS fec_proceso
-FROM base_controles
+FROM base_controles;

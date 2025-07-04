@@ -23,4 +23,4 @@ select
   trim(campo),
   safe_cast(criticidad as numeric),
   current_datetime('America/Lima') as fec_proceso
-FROM `brz-tpg-urp-2025-464218.dataentry_proyecto.calidad_criticidad_campo`
+FROM `brz-tpg-urp-2025-464218.dataentry_proyecto.calidad_criticidad_campo`;

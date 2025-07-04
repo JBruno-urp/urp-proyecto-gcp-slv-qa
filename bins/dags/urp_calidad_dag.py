@@ -1,4 +1,3 @@
-
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
@@ -40,7 +39,7 @@ with DAG(
     schedule_interval=None,
     start_date=days_ago(1),
     catchup=False,
-    tags=["urp", "calidad", "silver"]
+    tags=["urp", "gestion", "silver"]
 ) as dag:
 
     for group in PARAMS["write_dispositions"]:
@@ -48,11 +47,13 @@ with DAG(
             sql_path = os.path.join(os.path.dirname(__file__), f"sql-scripts/dml/urp_calidad/{script_name}.sql")
             sql_query = leer_sql_como_string(sql_path)
 
+            # Configuración básica
             config_query = {
                 "query": sql_query,
                 "useLegacySql": False
             }
 
+            # Detecta si es un script (varias instrucciones SQL)
             if sql_query.strip().count(";") <= 1:
                 config_query["createDisposition"] = PARAMS["create_disposition"]
                 config_query["writeDisposition"] = group["write_disposition"]

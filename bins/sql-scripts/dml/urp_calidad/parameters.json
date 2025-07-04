@@ -1,7 +1,7 @@
 {
     "dag_id": "urp_calidad_dag",
     "project_id": "slv-tpg-urp-2025-464218",
-    "location": "US",
+    "location": "us",
     "create_disposition": "CREATE_IF_NEEDED",
     "write_dispositions": [
         {

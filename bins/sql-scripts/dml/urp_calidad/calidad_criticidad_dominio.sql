@@ -21,4 +21,4 @@ select
   safe_cast(criticidad as numeric),
   proceso,
   current_datetime('America/Lima') as fec_proceso
-FROM `brz-tpg-urp-2025-464218.dataentry_proyecto.calidad_criticidad_dominio`
+FROM `brz-tpg-urp-2025-464218.dataentry_proyecto.calidad_criticidad_dominio`;

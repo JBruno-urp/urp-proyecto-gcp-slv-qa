@@ -23,4 +23,4 @@ select
   safe_cast(criticidad as numeric),
   case when trim(columnas_comunes) = '' then null else trim(columnas_comunes) end,
   current_datetime('America/Lima') as fec_proceso
-FROM `brz-tpg-urp-2025-464218.dataentry_proyecto.calidad_criticidad_subdominio`
+FROM `brz-tpg-urp-2025-464218.dataentry_proyecto.calidad_criticidad_subdominio`;
